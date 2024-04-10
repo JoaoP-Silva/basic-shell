@@ -78,7 +78,7 @@ runcmd(struct cmd *cmd)
     if(ecmd->argv[0] == 0)
       exit(1);
     
-    exec(ecmd->argv[0], ecmd->argv);
+    execvp(ecmd->argv[0], ecmd->argv);
     fprintf(stderr, "exec nao implementado\n");
     /* MARK END task2 */
     break;
