@@ -8,9 +8,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-/* MARK NAME Seu Nome Aqui */
+/* MARK NAME Joao Pedro F. Silva */
 /* MARK NAME Nome de Outro Integrante Aqui */
-/* MARK NAME E Etc */
 
 /****************************************************************
  * Shell xv6 simplificado
@@ -32,7 +31,7 @@ struct cmd {
 
 struct execcmd {
   int type;              // ' '
-  char *argv[MAXARGS];   // argumentos do comando a ser exec'utado
+  char *argv[MAXARGS];   // argumentos do comando a ser executado
 };
 
 struct redircmd {
@@ -76,6 +75,10 @@ runcmd(struct cmd *cmd)
     /* MARK START task2
      * TAREFA2: Implemente codigo abaixo para executar
      * comandos simples. */
+    if(ecmd->argv[0] == 0)
+      exit(1);
+    
+    exec(ecmd->argv[0], ecmd->argv);
     fprintf(stderr, "exec nao implementado\n");
     /* MARK END task2 */
     break;
@@ -86,6 +89,13 @@ runcmd(struct cmd *cmd)
     /* MARK START task3
      * TAREFA3: Implemente codigo abaixo para executar
      * comando com redirecionamento. */
+    close(rcmd->fd);
+    if(open(rcmd->file, rcmd->mode) < 0)
+    {
+      fprintf(stderr, "falha no open\n");
+      exit(1);
+    }
+    runcmd(rcmd->cmd);
     fprintf(stderr, "redir nao implementado\n");
     /* MARK END task3 */
     runcmd(rcmd->cmd);
@@ -96,6 +106,28 @@ runcmd(struct cmd *cmd)
     /* MARK START task4
      * TAREFA4: Implemente codigo abaixo para executar
      * comando com pipes. */
+    if(pipe(p) < 0)
+      fprintf(stderr, "falha no pipe\n");
+    if(fork1() == 0)
+    {
+      close(1);
+      dup(p[1]);
+      close(p[0]);
+      close(p[1]);
+      runcmd(pcmd->left);
+    }
+    if(fork1() == 0)
+    {
+      close(0);
+      dup(p[0]);
+      close(p[0]);
+      close(p[1]);
+      runcmd(pcmd->right);
+    }
+    close(p[0]);
+    close(p[1]);
+    wait(0);
+    wait(0);
     fprintf(stderr, "pipe nao implementado\n");
     /* MARK END task4 */
     break;
@@ -130,7 +162,7 @@ main(void)
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       buf[strlen(buf)-1] = 0;
       if(chdir(buf+3) < 0)
-        fprintf(stderr, "reporte erro\n");
+        fprintf(stderr, "No such file or directory\n");
       continue;
     }
     /* MARK END task1 */
